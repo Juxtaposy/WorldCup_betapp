@@ -1,1 +1,1 @@
-#First attempt at App for match score determination
+#First attempt at App for match score determination and match typing
