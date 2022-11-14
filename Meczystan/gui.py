@@ -2,9 +2,12 @@
 #Importing library
 import PySimpleGUI as sg
 #Some standard layout to start
-layout = [[sg.Text('Tekst dolny')], [sg.Button('OK')]]
+sg.change_look_and_feel('LightGrey1')
+layout = [[sg.Text("Menu")], [sg.Button('Faza Grupowa'), sg.Button('Drabinka Pucharowa'), sg.Button('Typowanie'), sg.Button('Użytkownicy')]]
+#We can adjust size manually here, probably will be automatic in the end to match the layout
+size = (800,800)
 #Create window with defined abouve layout and text 'Demo'
-window = sg.Window('Demo', layout)
+window = sg.Window('Meczystan', layout,ttk_theme='aqua')
 #Loop for the GUI - events are passed to variables and depending on their value, something happens
 #Here, we break the looop by clicking OK or clicking exit button in the window which break the loop
 while True:
