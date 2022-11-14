@@ -8,7 +8,7 @@ menu_def = ['&File', ['&New File', '&Open...','Open &Module','---', '!&Recent Fi
 
 def open_fg():
     layout = [[sg.Text("Faza Grupowa")]]
-    window = sg.Window(layout)
+    window = sg.Window("FG Window",layout)
     while True:
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
@@ -17,7 +17,7 @@ def open_fg():
 
 def open_dp():
     layout = [[sg.Text("Drabinka Pucharowa")]]
-    window = sg.Window(layout)
+    window = sg.Window("DP Window",layout)
     while True:
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
@@ -26,7 +26,7 @@ def open_dp():
 
 def open_t():
     layout = [[sg.Text("Typowanie")]]
-    window = sg.Window(layout)
+    window = sg.Window("T Window",layout)
     while True:
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
@@ -35,7 +35,7 @@ def open_t():
 
 def open_u():
     layout = [[sg.Text("Użytkownicy")]]
-    window = sg.Window(layout)
+    window = sg.Window("U Window",layout)
     while True:
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
@@ -45,14 +45,13 @@ def open_u():
 #Main function
 def main():
     #Horizontal layout definition for buttons
-    layout = [[sg.Menu(menu_def)],[sg.Text("Menu")], [sg.Button('Faza Grupowa',key="fg"), sg.Button('Drabinka Pucharowa',key="dp"), sg.Button('Typowanie',key="t"), sg.Button('Użytkownicy',key="t")]]
-    #Create window with defined control parameters
-    window = sg.Window('Meczystan', layout, ttk_theme='aqua')
+    layout = [[sg.Menu(menu_def)], [sg.Button('Faza Grupowa',key="fg"), sg.Button('Drabinka Pucharowa',key="dp"), sg.Button('Typowanie',key="t"), sg.Button('Użytkownicy',key="u")]]
+    #Create window with control parameters for the App
+    window = sg.Window('Meczystan', layout)
 
+    #Some options for the User to do
     while True:
         event, values = window.read()
-
-        
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
