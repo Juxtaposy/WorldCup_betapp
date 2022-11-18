@@ -13,11 +13,88 @@ class Users:
     #We keep track of created users in order to avoid name conflicts
     instances = []
     #Constructor
-    def __init__(self,name) -> None:
+    def __init__(self,name: str) -> None:
         self.name = name
+        #Placeholder
         self.typy_gr = [] #Faza grupowa
         self.typy_p = []  #Faza pucharowa
         Users.instances.append(self)
+
+#Class for Groups creation
+class Kraj:
+    def __init__(self,name: str) -> None:
+        self.name = name
+        self.table = [['RM', 'W', 'R', 'P', 'BZ', 'BS', 'RB', 'Pkt'], [0, 0, 0, 0, 0, 0, 0, 0]]
+    def updatescore(self,list: list) -> None:
+        self.table[1] = list
+    def __str__(self) -> str:
+        return f'{self.name} ma obecnie statystyki:\n\
+        Rozegrane Mecze:    {self.table[1][0]}\n\
+        Wygrane:            {self.table[1][1]}\n\
+        Remisy:             {self.table[1][2]}\n\
+        Przegrane:          {self.table[1][3]}\n\
+        Bramki zdobyte:     {self.table[1][4]}\n\
+        Bramki stracone:    {self.table[1][5]}\n\
+        Bilans Bramkowy:    {self.table[1][6]}\n\
+        Punkty:             {self.table[1][7]}\n'
+class Grupy:
+    def __init__(self,letter,team1,team2,team3,team4) -> None:
+        self.letter = letter
+        self.table = [['RM', 'W', 'R', 'P', 'BZ', 'BS', 'RB', 'Pkt']]
+
+
+#Nations and groups definition
+Katar = Kraj('Katar')
+Ekwador = Kraj('Ekwador')
+Senegal = Kraj('Senegal')
+Holandia = Kraj('Holandia')
+Grupa_A = Grupy('A',Katar,Ekwador,Senegal,Holandia)
+
+
+Anglia = Kraj('Anglia')
+Iran = Kraj('Iran')
+USA = Kraj('USA')
+Walia = Kraj('Walia')
+Grupa_B = Grupy('B',Anglia,Iran,USA,Walia)
+
+Argentyna = Kraj('Argentyna')
+Arabia_Saudyjska = Kraj('Arabia Saudyjska')
+Meksyk = Kraj('Meksyk')
+Polska = Kraj('Polska')
+Grupa_C = Grupy('C',Argentyna,Arabia_Saudyjska,Meksyk,Polska)
+
+
+Francja = Kraj('Francja')
+Australia = Kraj('Australia')
+Dania = Kraj('Dania')
+Tunezja = Kraj('Tunezja')
+Grupa_D = Grupy('D',Francja,Australia,Dania,Tunezja)
+
+Hiszpania = Kraj('Hiszpania')
+Kostaryka = Kraj('Kostaryka')
+Niemcy = Kraj('Niemcy')
+Japonia = Kraj('Japonia')
+Grupa_E = Grupy('E',Hiszpania,Kostaryka,Niemcy,Japonia)
+
+Belgia = Kraj('Belgia')
+Kanada = Kraj('Kanada')
+Maroko = Kraj('Maroko')
+Chorwacja = Kraj('Chorwacja')
+Grupa_F = Grupy('F',Belgia,Kanada,Maroko,Chorwacja)
+
+Brazylia = Kraj('Brazylia')
+Serbia = Kraj('Serbia')
+Szwajcaria = Kraj('Szwajcaria')
+Kamerun = Kraj('Kamerun')
+Grupa_G = Grupy('G',Brazylia,Serbia,Szwajcaria,Kamerun)
+
+Portugalia = Kraj('Portugalia')
+Ghana = Kraj('Ghana')
+Urugwaj = Kraj('Urugwaj')
+Korea_Południowa = Kraj('Korea Południowa')
+Grupa_H = Grupy('H',Portugalia,Ghana,Urugwaj,Korea_Południowa)
+
+print(Katar)
 
 #Some standard layout to start with basic color theme
 sg.change_look_and_feel('LightGrey1')
