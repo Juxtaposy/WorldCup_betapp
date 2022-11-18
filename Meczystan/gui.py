@@ -8,7 +8,7 @@ __location__ = os.path.realpath(
 #We import pickle to save user objects in a file for database purposes
 import pickle
 
-#Class for users
+#Class for Users
 class Users:
     #We keep track of created users in order to avoid name conflicts
     instances = []
@@ -20,10 +20,25 @@ class Users:
         self.typy_p = []  #Faza pucharowa
         Users.instances.append(self)
 
+#Class for match pair
+class Mecz():
+    def __init__(self,team1,team2) -> None:
+        self.team1 = team1
+        self.team2 = team2
+        self.name = f'{team1.name} - {team2.name}'
+        self.score = [0,0]
+        self.status = False
+    def updatescore(self,v1: int,v2: int) ->None:
+        self.score = [v1,v2]
+    def __str__(self) -> str:
+        if self.status:
+            return (f'{self.team1.name} {self.score[0]} - {self.score[1]} {self.team2.name}')
+        else:
+            return (f'{self.team1.name} - - - {self.team2.name}')
 #Class for Groups creation
 class Kraj:
     def __init__(self,name: str) -> None:
-        self.name = name
+        self.name = name.center(40)
         self.table = [['RM', 'W', 'R', 'P', 'BZ', 'BS', 'RB', 'Pkt'], [0, 0, 0, 0, 0, 0, 0, 0]]
     def updatescore(self,list: list) -> None:
         self.table[1] = list
@@ -37,11 +52,21 @@ class Kraj:
         Bramki stracone:    {self.table[1][5]}\n\
         Bilans Bramkowy:    {self.table[1][6]}\n\
         Punkty:             {self.table[1][7]}\n'
+
 class Grupy:
     def __init__(self,letter,team1,team2,team3,team4) -> None:
+        #Setting name of a group and nations within it
         self.letter = letter
-        self.table = [['RM', 'W', 'R', 'P', 'BZ', 'BS', 'RB', 'Pkt']]
-
+        self.team1 = team1
+        self.team2 = team2
+        self.team3 = team3
+        self.team4 = team4
+        #List of matches in a group
+        self.matches = [Mecz(self.team1,self.team2), Mecz(self.team3,self.team4),
+         Mecz(self.team1,self.team3), Mecz(self.team4,self.team2),
+         Mecz(self.team2,self.team3), Mecz(self.team4,self.team1)]
+    def __str__(self) -> str:
+        return (f'{self.team1.name}\n{self.team2.name}\n{self.team3.name}\n{self.team4.name}\n')
 
 #Nations and groups definition
 Katar = Kraj('Katar')
@@ -50,7 +75,6 @@ Senegal = Kraj('Senegal')
 Holandia = Kraj('Holandia')
 Grupa_A = Grupy('A',Katar,Ekwador,Senegal,Holandia)
 
-
 Anglia = Kraj('Anglia')
 Iran = Kraj('Iran')
 USA = Kraj('USA')
@@ -58,11 +82,10 @@ Walia = Kraj('Walia')
 Grupa_B = Grupy('B',Anglia,Iran,USA,Walia)
 
 Argentyna = Kraj('Argentyna')
-Arabia_Saudyjska = Kraj('Arabia Saudyjska')
+Arabia_Saudyjska = Kraj('Arabia Saud.')
 Meksyk = Kraj('Meksyk')
 Polska = Kraj('Polska')
 Grupa_C = Grupy('C',Argentyna,Arabia_Saudyjska,Meksyk,Polska)
-
 
 Francja = Kraj('Francja')
 Australia = Kraj('Australia')
@@ -91,16 +114,16 @@ Grupa_G = Grupy('G',Brazylia,Serbia,Szwajcaria,Kamerun)
 Portugalia = Kraj('Portugalia')
 Ghana = Kraj('Ghana')
 Urugwaj = Kraj('Urugwaj')
-Korea_Południowa = Kraj('Korea Południowa')
+Korea_Południowa = Kraj('Korea Płd.')
 Grupa_H = Grupy('H',Portugalia,Ghana,Urugwaj,Korea_Południowa)
 
-print(Katar)
 
 #Some standard layout to start with basic color theme
 sg.change_look_and_feel('LightGrey1')
 
 #Menu definition - template
-menu_def = ['&File', ['&New File', '&Open...','Open &Module','---', '!&Recent Files','C&lose']],['&Save',['&Save File', 'Save &As','Save &Copy'  ]],['&Edit', ['&Cut', '&Copy', '&Paste']]
+menu_def = ['&File', ['&New File', '&Open...','Open &Module','---','!&Recent Files','C&lose']],\
+    ['&Save',['&Save File', 'Save &As','Save &Copy'  ]],['&Edit', ['&Cut', '&Copy', '&Paste']]
 
 #Read database file
 def db_read():
@@ -118,14 +141,29 @@ def db_write(database):
     pickle.dump(database,file,pickle.HIGHEST_PROTOCOL)
     file.close()
 
+def open_gr():
+    pass
+
 #Function to open Faza Grupowa window and its layout
-def open_fg():
-    layout = [[sg.Text("Faza Grupowa")]]
-    window = sg.Window("FG Window",layout)
+def open_g():
+    layout = [[sg.Button("Grupa A",pad=(70,0),key='A'), sg.Button("Grupa B",pad=(70,0),key='B')], [sg.Text(Grupa_A), sg.Text(Grupa_B)],
+    [sg.Button("Grupa C",pad=(70,0),key='C'), sg.Button("Grupa D",pad=(70,0),key='D')], [sg.Text(Grupa_C), sg.Text(Grupa_D)],
+    [sg.Button("Grupa E",pad=(70,0),key='E'), sg.Button("Grupa F",pad=(70,0),key='F')], [sg.Text(Grupa_E), sg.Text(Grupa_F)],
+    [sg.Button("Grupa G",pad=(70,0),key='G'), sg.Button("Grupa H",pad=(70,0),key='H')], [sg.Text(Grupa_G), sg.Text(Grupa_H)]]
+
+    window = sg.Window("",layout)
     while True:
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
+        if event == "A": break
+        if event == "B": break
+        if event == "C": break
+        if event == "D": break
+        if event == "E": break
+        if event == "F": break
+        if event == "G": break
+        if event == "H": break
     window.close()
 
 #Function to open Drabinka Pucharowa window and its layout
@@ -161,7 +199,7 @@ def open_wu():
             event, values = window.read()
             if event == "Exit" or event == sg.WIN_CLOSED:
                 break
-            if event == "usun": print('ZAKTUALIZUJ DYNAMICZNE USUWANIE')
+            if event == "usun": print('ZAKTUALIZUJ USUWANIE')
         window.close()
 
 #Function for adding new users to database file
@@ -184,7 +222,7 @@ def open_du():
 #Function for opening user database and loading it into program
 def open_u():
     #Open existing database and load users into program
-    layout = [[sg.Button("Wyświel Użytkowników", key = "wu")], [sg.Button("Dodaj Użytkownika", key = "du")]]
+    layout = [[sg.Button("Wyświetl Użytkowników", key = "wu")], [sg.Button("Dodaj Użytkownika", key = "du")]]
     window = sg.Window("U Window",layout)
     while True:
         event, values = window.read()
@@ -197,7 +235,7 @@ def open_u():
 #Main function
 def main():
     #Horizontal layout definition for buttons
-    layout = [[sg.Menu(menu_def)], [sg.Button('Faza Grupowa',key="fg"), sg.Button('Drabinka Pucharowa',key="dp"), sg.Button('Typowanie',key="t"), sg.Button('Użytkownicy',key="u")]]
+    layout = [[sg.Menu(menu_def)], [sg.Button('Grupy',key="g"), sg.Button('Drabinka Pucharowa',key="dp"), sg.Button('Typowanie',key="t"), sg.Button('Użytkownicy',key="u")]]
     #Create window with control parameters for the App
     window = sg.Window('Meczystan', layout)
 
@@ -207,7 +245,7 @@ def main():
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
-        if event == "fg": open_fg()
+        if event == "g": open_g()
         if event == "dp": open_dp()
         if event == "t": open_t()
         if event == "u": open_u()
