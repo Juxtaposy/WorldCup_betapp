@@ -43,15 +43,15 @@ class Kraj:
     def updatescore(self,list: list) -> None:
         self.table[1] = list
     def __str__(self) -> str:
-        return f'{self.name} ma obecnie statystyki:\n\
-        Rozegrane Mecze:    {self.table[1][0]}\n\
-        Wygrane:            {self.table[1][1]}\n\
-        Remisy:             {self.table[1][2]}\n\
-        Przegrane:          {self.table[1][3]}\n\
-        Bramki zdobyte:     {self.table[1][4]}\n\
-        Bramki stracone:    {self.table[1][5]}\n\
-        Bilans Bramkowy:    {self.table[1][6]}\n\
-        Punkty:             {self.table[1][7]}\n'
+        return f'{self.name}:\n\
+        Rozegrane Mecze:     {self.table[1][0]}\n\
+        Wygrane:                  {self.table[1][1]}\n\
+        Remisy:                    {self.table[1][2]}\n\
+        Przegrane:                {self.table[1][3]}\n\
+        Bramki zdobyte:        {self.table[1][4]}\n\
+        Bramki stracone:       {self.table[1][5]}\n\
+        Bilans Bramkowy:      {self.table[1][6]}\n\
+        Punkty:                     {self.table[1][7]}\n'
 
 class Grupy:
     def __init__(self,letter,team1,team2,team3,team4) -> None:
@@ -67,6 +67,8 @@ class Grupy:
          Mecz(self.team2,self.team3), Mecz(self.team4,self.team1)]
     def __str__(self) -> str:
         return (f'{self.team1.name}\n{self.team2.name}\n{self.team3.name}\n{self.team4.name}\n')
+    #def details(self) -> str:
+        #return (f'{}')
 
 #Nations and groups definition
 Katar = Kraj('Katar')
@@ -117,6 +119,7 @@ Urugwaj = Kraj('Urugwaj')
 Korea_Południowa = Kraj('Korea Płd.')
 Grupa_H = Grupy('H',Portugalia,Ghana,Urugwaj,Korea_Południowa)
 
+gr_list = [Grupa_A,Grupa_B,Grupa_C,Grupa_D,Grupa_F,Grupa_G,Grupa_H]
 
 #Some standard layout to start with basic color theme
 sg.change_look_and_feel('LightGrey1')
@@ -141,8 +144,16 @@ def db_write(database):
     pickle.dump(database,file,pickle.HIGHEST_PROTOCOL)
     file.close()
 
-def open_gr():
-    pass
+def open_gr(Grupa):
+    print(type(Grupa))
+    layout = [[sg.Text(f"Drużyny w grupie {Grupa.letter}",pad = (270,20))], [sg.Text(Grupa.team1.__str__(),pad=(70,0)),
+    sg.Text(Grupa.team2.__str__(),pad=(70,0))], [sg.Text(Grupa.team3.__str__(),pad=(70,0)), sg.Text(Grupa.team4.__str__(),pad=(70,0))] ]
+    window = sg.Window("",layout)
+    while True:
+        event, values = window.read()
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+    window.close()
 
 #Function to open Faza Grupowa window and its layout
 def open_g():
@@ -156,14 +167,14 @@ def open_g():
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
-        if event == "A": break
-        if event == "B": break
-        if event == "C": break
-        if event == "D": break
-        if event == "E": break
-        if event == "F": break
-        if event == "G": break
-        if event == "H": break
+        if event == "A": open_gr(gr_list[0])
+        if event == "B": open_gr(gr_list[1])
+        if event == "C": open_gr(gr_list[2])
+        if event == "D": open_gr(gr_list[3])
+        if event == "E": open_gr(gr_list[4])
+        if event == "F": open_gr(gr_list[5])
+        if event == "G": open_gr(gr_list[6])
+        if event == "H": open_gr(gr_list[7])
     window.close()
 
 #Function to open Drabinka Pucharowa window and its layout
