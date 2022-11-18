@@ -67,8 +67,6 @@ class Grupy:
          Mecz(self.team2,self.team3), Mecz(self.team4,self.team1)]
     def __str__(self) -> str:
         return (f'{self.team1.name}\n{self.team2.name}\n{self.team3.name}\n{self.team4.name}\n')
-    #def details(self) -> str:
-        #return (f'{}')
 
 #Nations and groups definition
 Katar = Kraj('Katar')
@@ -119,7 +117,8 @@ Urugwaj = Kraj('Urugwaj')
 Korea_Południowa = Kraj('Korea Płd.')
 Grupa_H = Grupy('H',Portugalia,Ghana,Urugwaj,Korea_Południowa)
 
-gr_list = [Grupa_A,Grupa_B,Grupa_C,Grupa_D,Grupa_F,Grupa_G,Grupa_H]
+#A list of created group objects
+gr_list = [Grupa_A,Grupa_B,Grupa_C,Grupa_D,Grupa_E,Grupa_F,Grupa_G,Grupa_H]
 
 #Some standard layout to start with basic color theme
 sg.change_look_and_feel('LightGrey1')
@@ -144,8 +143,8 @@ def db_write(database):
     pickle.dump(database,file,pickle.HIGHEST_PROTOCOL)
     file.close()
 
+#Function to display Nations in given group and display their statistics
 def open_gr(Grupa):
-    print(type(Grupa))
     layout = [[sg.Text(f"Drużyny w grupie {Grupa.letter}",pad = (270,20))], [sg.Text(Grupa.team1.__str__(),pad=(70,0)),
     sg.Text(Grupa.team2.__str__(),pad=(70,0))], [sg.Text(Grupa.team3.__str__(),pad=(70,0)), sg.Text(Grupa.team4.__str__(),pad=(70,0))] ]
     window = sg.Window("",layout)
@@ -234,7 +233,7 @@ def open_du():
 def open_u():
     #Open existing database and load users into program
     layout = [[sg.Button("Wyświetl Użytkowników", key = "wu")], [sg.Button("Dodaj Użytkownika", key = "du")]]
-    window = sg.Window("U Window",layout)
+    window = sg.Window("",layout)
     while True:
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
@@ -243,21 +242,53 @@ def open_u():
         if event == "du": open_du()          
     window.close()
 
+#Function to dynamically add matches from individual groups to display in window by open_fg()
+def add_mgr(ind,obj):
+    ll = ['A','B','C','D','E','F','G','H']
+    obj.append([sg.Text(f'Mecze grupy {ll[ind]}')])
+    m = [[sg.Text(gr_list[ind].matches[i].__str__())] for i in range(6)]
+    for x in range(6): obj.append(m[x])
+    return obj
+
+#Function to hangle Faza Grupowa window
+def open_fg():
+    column = [[]]
+    for x in range(len(gr_list)): column = add_mgr(x,column)
+    layout = [[sg.Column(column, scrollable = True,vertical_scroll_only=True)]]
+    window = sg.Window('',layout,size=(500,500))
+    while True:
+        event, values = window.read()
+
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+    window.close()
+
+#Function to hangle Faza Pucharowa window
+def open_fp():
+    layout = [[sg.Text('Drabinka')]]
+    window = sg.Window('',layout)
+    while True:
+        event, values = window.read()
+
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+    window.close()
+
 #Main function
 def main():
     #Horizontal layout definition for buttons
-    layout = [[sg.Menu(menu_def)], [sg.Button('Grupy',key="g"), sg.Button('Drabinka Pucharowa',key="dp"), sg.Button('Typowanie',key="t"), sg.Button('Użytkownicy',key="u")]]
+    layout = [[sg.Menu(menu_def)], [sg.Button('Grupy',key="g"), sg.Button('Faza Grupowa',key="fg"), sg.Button('Faza Pucharowa',key="fp"), sg.Button('Typowanie',key="t"), sg.Button('Użytkownicy',key="u")]]
     #Create window with control parameters for the App
     window = sg.Window('Meczystan', layout)
-
     #Some options for the User to do
     while True:
         event, values = window.read()
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
+        if event == "fg": open_fg()
         if event == "g": open_g()
-        if event == "dp": open_dp()
+        if event == "fp": open_dp()
         if event == "t": open_t()
         if event == "u": open_u()
     window.close()
