@@ -42,7 +42,9 @@ class Mecz():
         if self.status:
             return (f'{self.team1.name} {self.score[0]} - {self.score[1]} {self.team2.name}')
         else:
-            return (f'{self.team1.name} - - - {self.team2.name}')
+            return f'{self.team1.name} - - - {self.team2.name}'
+    def typer(self,User: Users,score1: int,score2: int):
+        return f'{self.team1.name} {score1} - {score2} {self.team2.name}'
 #Class for Groups creation
 class Kraj:
     def __init__(self,name: str) -> None:
@@ -312,22 +314,31 @@ def open_u():
     window.close()
 
 #Function to dynamically add matches from individual groups to display in window by open_fg()
-def add_mgr(ind,obj):
+def add_mgr(ind,obj,user):
     ll = ['A','B','C','D','E','F','G','H']
-    obj.append([sg.Text(f'Mecze grupy {ll[ind]}')])
+    if not user: obj.append([sg.Text(f'Mecze grupy {ll[ind]}')])
+    if user: obj.append([sg.Text(f'Mecze grupy {ll[ind]}'),sg.Button("Typuj",key = ll[ind])])
     m = [[sg.Text(gr_list[ind].matches[i].__str__())] for i in range(6)]
     for x in range(6): obj.append(m[x])
     return obj
 
 #Function to hangle Faza Grupowa window
-def open_fg():
+def open_fg(i):
     column = [[]]
-    for x in range(len(gr_list)): column = add_mgr(x,column)
+    if not i: sg.Popup("Zaloguj sie aby typowac mecze")
+    for x in range(len(gr_list)): column = add_mgr(x,column,i)
     layout = [[sg.Column(column, scrollable = True,vertical_scroll_only=True)]]
     window = sg.Window('',layout,size=(500,500))
     while True:
         event, values = window.read()
-
+        if event == "A": print('A')
+        if event == "B": print('B')
+        if event == "C": print('C')
+        if event == "D": print('D')
+        if event == "E": print('E')
+        if event == "F": print('F')
+        if event == "G": print('G')
+        if event == "H": print('H')
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
     window.close()
@@ -357,7 +368,7 @@ def main():
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
-        if event == "fg": open_fg()
+        if event == "fg": open_fg(i)
         if event == "g": open_g()
         if event == "fp": open_dp()
         if event == "u": open_u()
