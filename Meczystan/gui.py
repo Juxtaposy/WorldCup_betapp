@@ -13,21 +13,29 @@ class Users:
     #We keep track of created users in order to avoid name conflicts
     instances = []
     #Constructor
-    def __init__(self,name: str) -> None:
+    def __init__(self,name: str,password: str) -> None:
         self.name = name
+        self.__password = password
         #Placeholder
         self.typy_gr = [] #Faza grupowa
         self.typy_p = []  #Faza pucharowa
         Users.instances.append(self)
+    #Method for password check
+    def checkpass(self,attempt: str) -> bool:
+        if attempt == self.__password: return True
+        else: return False
 
 #Class for match pair
 class Mecz():
+    id = 0
     def __init__(self,team1,team2) -> None:
         self.team1 = team1
         self.team2 = team2
         self.name = f'{team1.name} - {team2.name}'
         self.score = [0,0]
         self.status = False
+        self.id = Mecz.id
+        Mecz.id += 1
     def updatescore(self,v1: int,v2: int) ->None:
         self.score = [v1,v2]
     def __str__(self) -> str:
@@ -189,57 +197,118 @@ def open_dp():
 #Function to open Typowanie window and its layout
 def open_t():
     layout = [[sg.Text("Typowanie")]]
-    window = sg.Window("T Window",layout)
+    window = sg.Window("",layout)
     while True:
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
     window.close()
-
+def open_log():
+    layout = [[sg.Text("Wprowadz nazwe uzytkownika"), sg.InputText()],[sg.Text("Wprowadz haslo"), sg.InputText(password_char="*")], [sg.Submit(),sg.Cancel()]]
+    window = sg.Window("Logowanie",layout)
+    database = db_read()
+    user = []
+    while True:
+        event, values = window.read()
+        if event == "Cancel" or event == sg.WIN_CLOSED:
+            break
+        if not database:
+            sg.Popup('Baza jest pusta!')
+            break
+        if not values[0] or not values[1]:
+            sg.Popup('Wprowadz nazwe uzytkownika i haslo')
+        if values[0] and values[1]:
+            for i in database:
+                if values[0] in i.name:
+                    if i.checkpass(values[1]):
+                        sg.Popup(f'Zalogowano {i.name}')
+                        user = i
+                        window.close()
+                        return user
+                    else:
+                        sg.Popup('Zle hasło!')
+                else: sg.Popup("Brak uzytkownika o podanej nazwie"); break    
+    window.close()
 #Function to open Użytkownicy w bazie window and its layout.
 def open_wu():
     #Dynamic layout building using list comprehension for text and button
     database = db_read()   
+    
     if not database:
         sg.Popup('Baza jest pusta!')
     else:
-        layout = [[[sg.Text(i.name), sg.Button("Usuń",key="usun")] for i in database]]
+        layout = [[sg.Text(i.name)] for i in database]
+        values = [i.name for i in database]
         window = sg.Window("Użytkownicy w bazie",layout)
         while True:
             event, values = window.read()
             if event == "Exit" or event == sg.WIN_CLOSED:
                 break
-            if event == "usun": print('ZAKTUALIZUJ USUWANIE')
         window.close()
 
 #Function for adding new users to database file
 def open_du():
-    layout = [[sg.Text("Enter username"), sg.InputText()], [sg.Submit(),sg.Cancel()]]
+    layout = [[sg.Text("Enter username"), sg.InputText()],[sg.Text("Enter password"), sg.InputText(password_char="*")], [sg.Submit(),sg.Cancel()]]
     window = sg.Window("Nowy użytkownik",layout)
-    event, values = window.read()
     database = db_read()
-    if database:
-        for obj in database:
-            if values[0] == obj.name: 
-                sg.Popup('Nazwa zajęta, wybierz inną!')
-                values[0] = False
-    if values[0]: 
-        obj = Users(values[0])
-        database.append(obj)
-        db_write(database)
+    check = True
+    while True:
+        event, values = window.read()
+        if event == "Cancel" or event == sg.WIN_CLOSED:
+                break  
+        if not values[0] or not values[1]:
+            sg.Popup('Wprowadz nazwe uzytkownika i haslo')
+            check = False
+            
+        if database:
+            for obj in database:
+                if values[0] == obj.name: 
+                    sg.Popup('Nazwa zajeta')
+                    check = False        
+        if check: 
+            obj = Users(values[0],values[1])
+            database.append(obj)
+            db_write(database)
+            break
+    window.close()
+
+def open_uu():
+    layout = [[sg.Text("Enter username"), sg.InputText()],[sg.Text("Enter password"), sg.InputText()], [sg.Submit(),sg.Cancel()]]
+    window = sg.Window("Usuwanie Uzytkownika",layout)
+    database = db_read()
+    if not database:
+        sg.Popup('Baza jest pusta')
+    else:  
+    
+        while True:
+            event, values = window.read()
+            if event == "Cancel" or event == sg.WIN_CLOSED:
+                    break  
+            
+            if not values[0] or not values[1]:
+                sg.Popup('Wprowadz nazwe uzytkownika i haslo')
+                check = False   
+            if database:
+                for obj in database:
+                    if values[0] == obj.name and obj.checkpass(values[1]):
+                        sg.Popup('Uzytkownik usuniety')
+                        database.remove(obj)
+                        db_write(database)
+                        break       
     window.close()
 
 #Function for opening user database and loading it into program
 def open_u():
     #Open existing database and load users into program
-    layout = [[sg.Button("Wyświetl Użytkowników", key = "wu")], [sg.Button("Dodaj Użytkownika", key = "du")]]
+    layout = [[sg.Button("Wyświetl Użytkowników", key = "wu")], [sg.Button("Dodaj Użytkownika", key = "du")], [sg.Button("Usun Uzytkownika", key = 'uu')]]
     window = sg.Window("",layout)
     while True:
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
         if event == "wu": open_wu() 
-        if event == "du": open_du()          
+        if event == "du": open_du()     
+        if event == "uu": open_uu()       
     window.close()
 
 #Function to dynamically add matches from individual groups to display in window by open_fg()
@@ -277,11 +346,13 @@ def open_fp():
 #Main function
 def main():
     #Horizontal layout definition for buttons
-    layout = [[sg.Menu(menu_def)], [sg.Button('Grupy',key="g"), sg.Button('Faza Grupowa',key="fg"), sg.Button('Faza Pucharowa',key="fp"), sg.Button('Typowanie',key="t"), sg.Button('Użytkownicy',key="u")]]
+    layout = [[sg.Menu(menu_def)], [sg.Button('Zaloguj',key='l'), sg.Button('Wyloguj',key='lo'), sg.Button('Grupy',key="g"), sg.Button('Faza Grupowa',key="fg"), sg.Button('Faza Pucharowa',key="fp"), sg.Button('Użytkownicy',key="u")]]
     #Create window with control parameters for the App
     window = sg.Window('Meczystan', layout)
     #Some options for the User to do
+    i = None
     while True:
+        
         event, values = window.read()
 
         if event == "Exit" or event == sg.WIN_CLOSED:
@@ -289,8 +360,12 @@ def main():
         if event == "fg": open_fg()
         if event == "g": open_g()
         if event == "fp": open_dp()
-        if event == "t": open_t()
         if event == "u": open_u()
+        if event == "l":
+            if not i: i = open_log()
+            else: sg.Popup(f'Uzytkownik {i.name} juz jest zalogowany')
+        if event == "lo": i = None; sg.Popup("Wylogowano")
+
     window.close()
 
 if __name__ == "__main__":
