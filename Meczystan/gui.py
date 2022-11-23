@@ -143,13 +143,16 @@ def db_read():
         file = open(''.join((__location__, "\\users_data.pkl")),'rb')
         database= pickle.load(file)
         file.close()
+        database = [database[k] for k in database]
         return database
     except:
-        database = {}
+        database = []
         return database
+
 #Write database file
 def db_write(database):
     file = open(''.join((__location__, "\\users_data.pkl")),'wb')
+    database = {k.name: k for k in database}
     pickle.dump(database,file,pickle.HIGHEST_PROTOCOL)
     file.close()
 
@@ -205,10 +208,9 @@ def open_t():
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
     window.close()
-def open_log():
+def open_log(database):
     layout = [[sg.Text("Wprowadz nazwe uzytkownika"), sg.InputText()],[sg.Text("Wprowadz haslo"), sg.InputText(password_char="*")], [sg.Submit(),sg.Cancel()]]
     window = sg.Window("Logowanie",layout)
-    database = db_read()
     user = []
     while True:
         event, values = window.read()
@@ -221,26 +223,27 @@ def open_log():
             sg.Popup('Wprowadz nazwe uzytkownika i haslo')
         if values[0] and values[1]:
             for i in database:
-                if values[0] == i:
-                    if database[i].checkpass(values[1]):
-                        sg.Popup(f'Zalogowano {i}')
-                        user = {i: database[i]}
+                if values[0] == i.name:
+                    if i.checkpass(values[1]):
+                        sg.Popup(f'Zalogowano {i.name}')
+                        user = i
                         window.close()
-                        return user
+                        break
+                        
                     else:
                         sg.Popup('Zle hasło!')
-                else: sg.Popup("Brak uzytkownika o podanej nazwie"); break    
+            else: 
+                sg.Popup("Brak uzytkownika o podanej nazwie")
+                       
     window.close()
+    return user,database
 #Function to open Użytkownicy w bazie window and its layout.
-def open_wu():
-    #Dynamic layout building using list comprehension for text and button
-    database = db_read()   
-    
+def open_wu(database):
+    #Dynamic layout building using list comprehension for text and button  
     if not database:
         sg.Popup('Baza jest pusta!')
     else:
-        layout = [[sg.Text(i)] for i in database]
-        values = [i for i in database]
+        layout = [[sg.Text(i.name)] for i in database]
         window = sg.Window("Użytkownicy w bazie",layout)
         while True:
             event, values = window.read()
@@ -249,10 +252,9 @@ def open_wu():
         window.close()
 
 #Function for adding new users to database file
-def open_du():
+def open_du(database):
     layout = [[sg.Text("Enter username"), sg.InputText()],[sg.Text("Enter password"), sg.InputText(password_char="*")], [sg.Submit(),sg.Cancel()]]
     window = sg.Window("Nowy użytkownik",layout)
-    database = db_read()
     check = True
     while True:
         event, values = window.read()
@@ -264,21 +266,21 @@ def open_du():
             
         if database:
             for obj in database:
-                if values[0] == obj: 
+                if values[0] == obj.name: 
                     sg.Popup('Nazwa zajeta')
                     check = False        
         if check: 
             sg.Popup(f'Użytownik {values[0]} dodany')
             obj = Users(values[0],values[1])
-            database[values[0]] = obj
-            db_write(database)
+            database.append(obj)
             break
     window.close()
+    return database
+    
 
-def open_uu():
+def open_uu(database):
     layout = [[sg.Text("Enter username"), sg.InputText()],[sg.Text("Enter password"), sg.InputText(password_char='*')], [sg.Submit(),sg.Cancel()]]
     window = sg.Window("Usuwanie Uzytkownika",layout)
-    database = db_read()
     if not database:
         sg.Popup('Baza jest pusta')
     else:  
@@ -293,17 +295,15 @@ def open_uu():
                 check = False   
             if database:
                 for obj in database:
-                    if values[0] == obj and database[obj].checkpass(values[1]):
+                    if values[0] == obj.name and obj.checkpass(values[1]):
                         sg.Popup(f'Uzytkownik {values[0]} usuniety')
-                        del database[obj]
-                        db_write(database)
+                        database.remove(obj)
                         window.close()
                         break  
-                sg.Popup('Brak danego uzytkownika w bazie')     
     window.close()
-
+    return database
 #Function for opening user database and loading it into program
-def open_u():
+def open_u(database):
     #Open existing database and load users into program
     layout = [[sg.Button("Wyświetl Użytkowników", key = "wu")], [sg.Button("Dodaj Użytkownika", key = "du")], [sg.Button("Usun Uzytkownika", key = 'uu')]]
     window = sg.Window("",layout)
@@ -311,10 +311,11 @@ def open_u():
         event, values = window.read()
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
-        if event == "wu": open_wu() 
-        if event == "du": open_du()     
-        if event == "uu": open_uu()       
+        if event == "wu": open_wu(database) 
+        if event == "du": database = open_du(database)     
+        if event == "uu": database = open_uu(database)       
     window.close()
+    return database
 
 #Function to dynamically add matches from individual groups to display in window by open_fg()
 def add_mgr(ind,obj,user):
@@ -322,10 +323,18 @@ def add_mgr(ind,obj,user):
     if not user: 
         obj.append([sg.Text(f'Mecze grupy {ll[ind]}')])
         m = [[sg.Text(gr_list[ind].matches[i].__str__())] for i in range(6)]
+        
     if user: 
-        obj.append([sg.Text(f'Mecze grupy {ll[ind]}'),sg.Button("Typuj",key = 'type')])
-        m = [[sg.InputText(size=(3,1)), sg.Text(f'({user[list(user.keys())[0]].typy_gr[2*i]})',font='bold'), sg.Text(gr_list[ind].matches[i].__str__()), sg.Text(f'({user[list(user.keys())[0]].typy_gr[2*i+1]})',font='bold'), sg.InputText(size=(3,1))] for i in range(6)]
-   
+        obj.append([sg.Text(f'Mecze grupy {ll[ind]}'),sg.Button("Typuj",key = 'type'+ll[ind])])
+        # m1 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[0].__str__()), sg.Text(f'({user.typy_gr[ind*12+1]})',font='bold'), sg.InputText(size=(3,1))]
+        # m2 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[2+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[1].__str__()), sg.Text(f'({user.typy_gr[ind*12+3]})',font='bold'), sg.InputText(size=(3,1))]
+        # m3 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[4+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[2].__str__()), sg.Text(f'({user.typy_gr[ind*12+5]})',font='bold'), sg.InputText(size=(3,1))]
+        # m4 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[6+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[3].__str__()), sg.Text(f'({user.typy_gr[ind*12+7]})',font='bold'), sg.InputText(size=(3,1))]
+        # m5 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[8+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[4].__str__()), sg.Text(f'({user.typy_gr[ind*12+9]})',font='bold'), sg.InputText(size=(3,1))]
+        # m6 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[10+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[5].__str__()), sg.Text(f'({user.typy_gr[ind*12+11]})',font='bold'), sg.InputText(size=(3,1))]
+        # obj.append(m1); obj.append(m2); obj.append(m3);obj.append(m4); obj.append(m5); obj.append(m6)
+        m = [[sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[2*i+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[i].__str__()), sg.Text(f'({user.typy_gr[2*i+ind*12+1]})',font='bold'), sg.InputText(size=(3,1))] for i in range(6)]
+        
     for x in range(6): obj.append(m[x])
     return obj
 
@@ -338,8 +347,8 @@ def open_fg(i):
     window = sg.Window('',layout,size=(600,600))
     while True:
         event, values = window.read()
-        if event == "type": 
-            i[list(i.keys())[0]].typy_gr = {k: (values[k] if values[k] else i[list(i.keys())[0]].typy_gr[k]) for k in range(96)}
+        if event == "typeA" or event == "typeB" or event == "typeC" or event == "typeD" or event == "typeE" or event == "typeF" or event == "typeG" or event == "typeH": 
+            i.typy_gr = {k: (values[k] if values[k] else i.typy_gr[k]) for k in range(96)}
             window.close()
             open_fg(i)
         if event == "Exit" or event == sg.WIN_CLOSED:
@@ -365,25 +374,24 @@ def main():
     window = sg.Window('Meczystan', layout)
     #Some options for the User to do
     i = None
+    database = db_read()
     while True:
         
         event, values = window.read()
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
-        if event == "fg":
-             open_fg(i)
-
+        if event == "fg": open_fg(i)
         if event == "g": open_g()
-        if event == "fp": open_dp()
-        if event == "u": open_u()
+        if event == "fp": open_fp()
+        if event == "u": database == open_u(database)
         if event == "l":
-            if not i: i = open_log()
-            else: print(i); sg.Popup(f'Uzytkownik {list(i.keys())[0]} juz jest zalogowany')
+            if not i: i,database = open_log(database)
+            else: sg.Popup(f'Uzytkownik {i.name} juz jest zalogowany')
         if event == "lo": i = None; sg.Popup("Wylogowano")
 
     window.close()
-
+    db_write(database)
 if __name__ == "__main__":
     main()
 
