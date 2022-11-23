@@ -17,15 +17,15 @@ class Users:
         self.name = name
         self.__password = password
         #Placeholder
-        self.typy_gr = [] #Faza grupowa
-        self.typy_p = []  #Faza pucharowa
+        self.typy_gr = {k: '0' for k in range(96)} #Faza grupowa
+        self.typy_p = {}  #Faza pucharowa
         Users.instances.append(self)
     #Method for password check
     def checkpass(self,attempt: str) -> bool:
         if attempt == self.__password: return True
         else: return False
 
-#Class for match pair
+#Class for match pairs
 class Mecz():
     id = 0
     def __init__(self,team1,team2) -> None:
@@ -43,8 +43,8 @@ class Mecz():
             return (f'{self.team1.name} {self.score[0]} - {self.score[1]} {self.team2.name}')
         else:
             return f'{self.team1.name} - - - {self.team2.name}'
-    def typer(self,User: Users,score1: int,score2: int):
-        return f'{self.team1.name} {score1} - {score2} {self.team2.name}'
+    
+    
 #Class for Groups creation
 class Kraj:
     def __init__(self,name: str) -> None:
@@ -76,7 +76,7 @@ class Grupy:
          Mecz(self.team1,self.team3), Mecz(self.team4,self.team2),
          Mecz(self.team2,self.team3), Mecz(self.team4,self.team1)]
     def __str__(self) -> str:
-        return (f'{self.team1.name}\n{self.team2.name}\n{self.team3.name}\n{self.team4.name}\n')
+        return f'{self.team1.name}\n{self.team2.name}\n{self.team3.name}\n{self.team4.name}\n'
 
 #Nations and groups definition
 Katar = Kraj('Katar')
@@ -141,16 +141,17 @@ menu_def = ['&File', ['&New File', '&Open...','Open &Module','---','!&Recent Fil
 def db_read():
     try:
         file = open(''.join((__location__, "\\users_data.pkl")),'rb')
-        database = pickle.load(file)
+        database= pickle.load(file)
         file.close()
         return database
     except:
-        database = []
+        database = {}
         return database
 #Write database file
 def db_write(database):
     file = open(''.join((__location__, "\\users_data.pkl")),'wb')
-    pickle.dump(database,file,pickle.HIGHEST_PROTOCOL)
+    d = {database[k].name: database[k] for k in range(len(database))}
+    pickle.dumps(d,file,pickle.HIGHEST_PROTOCOL)
     file.close()
 
 #Function to display Nations in given group and display their statistics
@@ -316,9 +317,13 @@ def open_u():
 #Function to dynamically add matches from individual groups to display in window by open_fg()
 def add_mgr(ind,obj,user):
     ll = ['A','B','C','D','E','F','G','H']
-    if not user: obj.append([sg.Text(f'Mecze grupy {ll[ind]}')])
-    if user: obj.append([sg.Text(f'Mecze grupy {ll[ind]}'),sg.Button("Typuj",key = ll[ind])])
-    m = [[sg.Text(gr_list[ind].matches[i].__str__())] for i in range(6)]
+    if not user: 
+        obj.append([sg.Text(f'Mecze grupy {ll[ind]}')])
+        m = [[sg.Text(gr_list[ind].matches[i].__str__())] for i in range(6)]
+    if user: 
+        obj.append([sg.Text(f'Mecze grupy {ll[ind]}'),sg.Button("Typuj",key = 'type')])
+        m = [[sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[2*i]})',font='bold'), sg.Text(gr_list[ind].matches[i].__str__()), sg.Text(f'({user.typy_gr[2*i+1]})',font='bold'), sg.InputText(size=(3,1))] for i in range(6)]
+   
     for x in range(6): obj.append(m[x])
     return obj
 
@@ -327,18 +332,14 @@ def open_fg(i):
     column = [[]]
     if not i: sg.Popup("Zaloguj sie aby typowac mecze")
     for x in range(len(gr_list)): column = add_mgr(x,column,i)
-    layout = [[sg.Column(column, scrollable = True,vertical_scroll_only=True)]]
-    window = sg.Window('',layout,size=(500,500))
+    layout = [[sg.Column(column, scrollable = True,vertical_scroll_only=True,element_justification='center',expand_x=True)]]
+    window = sg.Window('',layout,size=(600,600))
     while True:
         event, values = window.read()
-        if event == "A": print('A')
-        if event == "B": print('B')
-        if event == "C": print('C')
-        if event == "D": print('D')
-        if event == "E": print('E')
-        if event == "F": print('F')
-        if event == "G": print('G')
-        if event == "H": print('H')
+        if event == "type": 
+            i.typy_gr = {k: (values[k] if values[k] else i.typy_gr[k]) for k in range(96)}
+            window.close()
+            open_fg(i)
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
     window.close()
@@ -368,7 +369,9 @@ def main():
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
-        if event == "fg": open_fg(i)
+        if event == "fg":
+             open_fg(i)
+
         if event == "g": open_g()
         if event == "fp": open_dp()
         if event == "u": open_u()
