@@ -222,10 +222,10 @@ def open_log():
             sg.Popup('Wprowadz nazwe uzytkownika i haslo')
         if values[0] and values[1]:
             for i in database:
-                if values[0] in i.name:
-                    if i.checkpass(values[1]):
-                        sg.Popup(f'Zalogowano {i.name}')
-                        user = i
+                if values[0] == i:
+                    if database[i].checkpass(values[1]):
+                        sg.Popup(f'Zalogowano {i}')
+                        user = {i: database[i]}
                         window.close()
                         return user
                     else:
@@ -240,8 +240,8 @@ def open_wu():
     if not database:
         sg.Popup('Baza jest pusta!')
     else:
-        layout = [[sg.Text(i.name)] for i in database]
-        values = [i.name for i in database]
+        layout = [[sg.Text(i)] for i in database]
+        values = [i for i in database]
         window = sg.Window("Użytkownicy w bazie",layout)
         while True:
             event, values = window.read()
@@ -265,12 +265,12 @@ def open_du():
             
         if database:
             for obj in database:
-                if values[0] == obj.name: 
+                if values[0] == obj: 
                     sg.Popup('Nazwa zajeta')
                     check = False        
         if check: 
             obj = Users(values[0],values[1])
-            database.append(obj)
+            database[values[0]] = obj
             db_write(database)
             break
     window.close()
@@ -293,9 +293,9 @@ def open_uu():
                 check = False   
             if database:
                 for obj in database:
-                    if values[0] == obj.name and obj.checkpass(values[1]):
+                    if values[0] == obj and database[obj].checkpass(values[1]):
                         sg.Popup('Uzytkownik usuniety')
-                        database.remove(obj)
+                        del database[obj]
                         db_write(database)
                         break       
     window.close()
