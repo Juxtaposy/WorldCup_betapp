@@ -150,8 +150,7 @@ def db_read():
 #Write database file
 def db_write(database):
     file = open(''.join((__location__, "\\users_data.pkl")),'wb')
-    d = {database[k].name: database[k] for k in range(len(database))}
-    pickle.dumps(d,file,pickle.HIGHEST_PROTOCOL)
+    pickle.dump(database,file,pickle.HIGHEST_PROTOCOL)
     file.close()
 
 #Function to display Nations in given group and display their statistics
@@ -269,6 +268,7 @@ def open_du():
                     sg.Popup('Nazwa zajeta')
                     check = False        
         if check: 
+            sg.Popup(f'Użytownik {values[0]} dodany')
             obj = Users(values[0],values[1])
             database[values[0]] = obj
             db_write(database)
@@ -276,7 +276,7 @@ def open_du():
     window.close()
 
 def open_uu():
-    layout = [[sg.Text("Enter username"), sg.InputText()],[sg.Text("Enter password"), sg.InputText()], [sg.Submit(),sg.Cancel()]]
+    layout = [[sg.Text("Enter username"), sg.InputText()],[sg.Text("Enter password"), sg.InputText(password_char='*')], [sg.Submit(),sg.Cancel()]]
     window = sg.Window("Usuwanie Uzytkownika",layout)
     database = db_read()
     if not database:
@@ -294,10 +294,12 @@ def open_uu():
             if database:
                 for obj in database:
                     if values[0] == obj and database[obj].checkpass(values[1]):
-                        sg.Popup('Uzytkownik usuniety')
+                        sg.Popup(f'Uzytkownik {values[0]} usuniety')
                         del database[obj]
                         db_write(database)
-                        break       
+                        window.close()
+                        break  
+                sg.Popup('Brak danego uzytkownika w bazie')     
     window.close()
 
 #Function for opening user database and loading it into program
@@ -322,7 +324,7 @@ def add_mgr(ind,obj,user):
         m = [[sg.Text(gr_list[ind].matches[i].__str__())] for i in range(6)]
     if user: 
         obj.append([sg.Text(f'Mecze grupy {ll[ind]}'),sg.Button("Typuj",key = 'type')])
-        m = [[sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[2*i]})',font='bold'), sg.Text(gr_list[ind].matches[i].__str__()), sg.Text(f'({user.typy_gr[2*i+1]})',font='bold'), sg.InputText(size=(3,1))] for i in range(6)]
+        m = [[sg.InputText(size=(3,1)), sg.Text(f'({user[list(user.keys())[0]].typy_gr[2*i]})',font='bold'), sg.Text(gr_list[ind].matches[i].__str__()), sg.Text(f'({user[list(user.keys())[0]].typy_gr[2*i+1]})',font='bold'), sg.InputText(size=(3,1))] for i in range(6)]
    
     for x in range(6): obj.append(m[x])
     return obj
@@ -337,7 +339,7 @@ def open_fg(i):
     while True:
         event, values = window.read()
         if event == "type": 
-            i.typy_gr = {k: (values[k] if values[k] else i.typy_gr[k]) for k in range(96)}
+            i[list(i.keys())[0]].typy_gr = {k: (values[k] if values[k] else i[list(i.keys())[0]].typy_gr[k]) for k in range(96)}
             window.close()
             open_fg(i)
         if event == "Exit" or event == sg.WIN_CLOSED:
@@ -377,7 +379,7 @@ def main():
         if event == "u": open_u()
         if event == "l":
             if not i: i = open_log()
-            else: sg.Popup(f'Uzytkownik {i.name} juz jest zalogowany')
+            else: print(i); sg.Popup(f'Uzytkownik {list(i.keys())[0]} juz jest zalogowany')
         if event == "lo": i = None; sg.Popup("Wylogowano")
 
     window.close()
