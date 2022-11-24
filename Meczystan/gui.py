@@ -42,7 +42,7 @@ class Mecz():
         if self.status:
             return (f'{self.team1.name} {self.score[0]} - {self.score[1]} {self.team2.name}')
         else:
-            return f'{self.team1.name} - - - {self.team2.name}'
+            return f'ID: {self.id} {self.team1.name} - - - {self.team2.name}'
     
     
 #Class for Groups creation
@@ -75,8 +75,12 @@ class Grupy:
         self.matches = [Mecz(self.team1,self.team2), Mecz(self.team3,self.team4),
          Mecz(self.team1,self.team3), Mecz(self.team4,self.team2),
          Mecz(self.team2,self.team3), Mecz(self.team4,self.team1)]
+        for i in self.matches: match_data.append(i)
     def __str__(self) -> str:
         return f'{self.team1.name}\n{self.team2.name}\n{self.team3.name}\n{self.team4.name}\n'
+
+#Match list
+match_data = []
 
 #Nations and groups definition
 Katar = Kraj('Katar')
@@ -137,7 +141,7 @@ sg.change_look_and_feel('LightGrey1')
 menu_def = ['&File', ['&New File', '&Open...','Open &Module','---','!&Recent Files','C&lose']],\
     ['&Save',['&Save File', 'Save &As','Save &Copy'  ]],['&Edit', ['&Cut', '&Copy', '&Paste']]
 
-#Read database file
+#Read user database file
 def db_read():
     try:
         file = open(''.join((__location__, "\\users_data.pkl")),'rb')
@@ -149,12 +153,29 @@ def db_read():
         database = []
         return database
 
-#Write database file
+#Write user database file
 def db_write(database):
     file = open(''.join((__location__, "\\users_data.pkl")),'wb')
     database = {k.name: k for k in database}
     pickle.dump(database,file,pickle.HIGHEST_PROTOCOL)
     file.close()
+
+#Write match database file
+def match_write(database):
+    file = open(''.join((__location__, "\\matches_data.pkl")),'wb')
+    pickle.dump(database,file,pickle.HIGHEST_PROTOCOL)
+    file.close()
+
+#Read match database file
+def match_read():
+    try:
+        file = open(''.join((__location__, "\\matches_data.pkl")),'rb')
+        database= pickle.load(file)
+        file.close()
+        return database
+    except:
+        database = match_data
+        return database
 
 #Function to display Nations in given group and display their statistics
 def open_gr(Grupa):
@@ -318,24 +339,24 @@ def open_u(database):
     return database
 
 #Function to dynamically add matches from individual groups to display in window by open_fg()
-def add_mgr(ind,obj,user):
+def add_mgr(ind,obj,user,match_data):
     ll = ['A','B','C','D','E','F','G','H']
     if not user: 
         obj.append([sg.Text(f'Mecze grupy {ll[ind]}')])
-        m = [[sg.Text(gr_list[ind].matches[i].__str__())] for i in range(6)]
+        m = [[sg.Text(match_data[i+6*ind].__str__())] for i in range(6)]
         
     if user: 
         obj.append([sg.Text(f'Mecze grupy {ll[ind]}'),sg.Button("Typuj",key = 'type'+ll[ind])])
-        m = [[sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[2*i+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[i].__str__()), sg.Text(f'({user.typy_gr[2*i+ind*12+1]})',font='bold'), sg.InputText(size=(3,1))] for i in range(6)]
+        m = [[sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[2*i+ind*12]})',font='bold'), sg.Text(match_data[i+6*ind].__str__()), sg.Text(f'({user.typy_gr[2*i+ind*12+1]})',font='bold'), sg.InputText(size=(3,1))] for i in range(6)]
         
     for x in range(6): obj.append(m[x])
     return obj
 
 #Function to hangle Faza Grupowa window
-def open_fg(i):
+def open_fg(i,match_data):
     column = [[]]
     if not i: sg.Popup("Zaloguj sie aby typowac mecze")
-    for x in range(len(gr_list)): column = add_mgr(x,column,i)
+    for x in range(len(gr_list)): column = add_mgr(x,column,i,match_data)
     layout = [[sg.Column(column, scrollable = True,vertical_scroll_only=True,element_justification='center',expand_x=True)]]
     window = sg.Window('',layout,size=(600,600))
     while True:
@@ -343,7 +364,7 @@ def open_fg(i):
         if event == "typeA" or event == "typeB" or event == "typeC" or event == "typeD" or event == "typeE" or event == "typeF" or event == "typeG" or event == "typeH": 
             i.typy_gr = {k: (values[k] if values[k] else i.typy_gr[k]) for k in range(96)}
             window.close()
-            open_fg(i)
+            open_fg(i,match_data)
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
     window.close()
@@ -358,23 +379,39 @@ def open_fp():
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
     window.close()
+#Function to admin window
+def open_admin(match_list):
+    layout = [[sg.Text('Podaj id meczu oraz wynik')], [ sg.Input(size = (5,5)),sg.Input(size = (5,5)), sg.Input(size = (5,5))], [sg.Submit(), sg.Cancel()]]
+    window = sg.Window('',layout)
+    while True:
+        event, values = window.read()
+        if event == "Cancel" or event == sg.WIN_CLOSED:
+            break
+        if values[0] and values[1] and values[2] and not match_list[int(values[0])].status:
+            match_list[int(values[0])].score = [int(values[1]),int(values[2])]
+            match_list[int(values[0])].status = True
+            sg.Popup(f'                               Wynik meczu\n\n\n{match_list[int(values[0])]}\n\n\n                               zaktualizowany      ',line_width=70)
+        else: sg.Popup('Nie mozna aktualizowac tego ID')
+    window.close()
+    return match_list
 
 #Main function
 def main():
     #Horizontal layout definition for buttons
-    layout = [[sg.Menu(menu_def)], [sg.Button('Zaloguj',key='l'), sg.Button('Wyloguj',key='lo'), sg.Button('Grupy',key="g"), sg.Button('Faza Grupowa',key="fg"), sg.Button('Faza Pucharowa',key="fp"), sg.Button('Użytkownicy',key="u")]]
+    layout = [[sg.Menu(menu_def)], [sg.Button('Zaloguj',key='l'), sg.Button('Wyloguj',key='lo'), sg.Button('Grupy',key="g"), sg.Button('Faza Grupowa',key="fg"), sg.Button('Faza Pucharowa',key="fp"), sg.Button('Użytkownicy',key="u"), sg.Button('Admin',key='a')]]
     #Create window with control parameters for the App
     window = sg.Window('Meczystan', layout)
     #Some options for the User to do
     i = None
     database = db_read()
+    match_data = match_read()
     while True:
         
         event, values = window.read()
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
-        if event == "fg": open_fg(i)
+        if event == "fg": open_fg(i,match_data)
         if event == "g": open_g()
         if event == "fp": open_fp()
         if event == "u": database == open_u(database)
@@ -382,9 +419,10 @@ def main():
             if not i: i,database = open_log(database)
             else: sg.Popup(f'Uzytkownik {i.name} juz jest zalogowany')
         if event == "lo": i = None; sg.Popup("Wylogowano")
-
+        if event == "a":  match_data = open_admin(match_data)
     window.close()
     db_write(database)
+    match_write(match_data)
 if __name__ == "__main__":
     main()
 
