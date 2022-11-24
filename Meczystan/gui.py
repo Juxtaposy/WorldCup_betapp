@@ -326,13 +326,6 @@ def add_mgr(ind,obj,user):
         
     if user: 
         obj.append([sg.Text(f'Mecze grupy {ll[ind]}'),sg.Button("Typuj",key = 'type'+ll[ind])])
-        # m1 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[0].__str__()), sg.Text(f'({user.typy_gr[ind*12+1]})',font='bold'), sg.InputText(size=(3,1))]
-        # m2 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[2+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[1].__str__()), sg.Text(f'({user.typy_gr[ind*12+3]})',font='bold'), sg.InputText(size=(3,1))]
-        # m3 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[4+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[2].__str__()), sg.Text(f'({user.typy_gr[ind*12+5]})',font='bold'), sg.InputText(size=(3,1))]
-        # m4 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[6+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[3].__str__()), sg.Text(f'({user.typy_gr[ind*12+7]})',font='bold'), sg.InputText(size=(3,1))]
-        # m5 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[8+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[4].__str__()), sg.Text(f'({user.typy_gr[ind*12+9]})',font='bold'), sg.InputText(size=(3,1))]
-        # m6 = [sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[10+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[5].__str__()), sg.Text(f'({user.typy_gr[ind*12+11]})',font='bold'), sg.InputText(size=(3,1))]
-        # obj.append(m1); obj.append(m2); obj.append(m3);obj.append(m4); obj.append(m5); obj.append(m6)
         m = [[sg.InputText(size=(3,1)), sg.Text(f'({user.typy_gr[2*i+ind*12]})',font='bold'), sg.Text(gr_list[ind].matches[i].__str__()), sg.Text(f'({user.typy_gr[2*i+ind*12+1]})',font='bold'), sg.InputText(size=(3,1))] for i in range(6)]
         
     for x in range(6): obj.append(m[x])
