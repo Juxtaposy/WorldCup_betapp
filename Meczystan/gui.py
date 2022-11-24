@@ -302,7 +302,7 @@ def open_uu(database):
                         break  
     window.close()
     return database
-#Function for opening user database and loading it into program
+#Function for opening user database and loading it into the program
 def open_u(database):
     #Open existing database and load users into program
     layout = [[sg.Button("Wyświetl Użytkowników", key = "wu")], [sg.Button("Dodaj Użytkownika", key = "du")], [sg.Button("Usun Uzytkownika", key = 'uu')]]
