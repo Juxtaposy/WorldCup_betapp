@@ -18,7 +18,7 @@ class Users:
         self.__password = password
         #Placeholder
         self.typy_gr = {k: '0' for k in range(96)} #Faza grupowa
-        self.typy_p = {}  #Faza pucharowa
+        self.typy_p = {k: '0' for k in range(32)}  #Faza pucharowa
         Users.instances.append(self)
     #Method for password check
     def checkpass(self,attempt: str) -> bool:
@@ -134,6 +134,10 @@ Grupa_H = Grupy('H',Portugalia,Ghana,Urugwaj,Korea_Południowa)
 #A list of created group objects
 gr_list = [Grupa_A,Grupa_B,Grupa_C,Grupa_D,Grupa_E,Grupa_F,Grupa_G,Grupa_H]
 
+#List for Faza Pucharowa matches
+fp_matches = [Mecz(Holandia,USA),Mecz(Argentyna,Australia),Mecz(Francja,Polska),Mecz(Anglia,Senegal),Mecz(Japonia,Chorwacja),Mecz(Brazylia,Korea_Południowa),Mecz(Maroko,Hiszpania),Mecz(Portugalia,Szwajcaria),
+Mecz(Chorwacja,Brazylia),Mecz(Holandia,Argentyna),Mecz(Maroko,Portugalia),Mecz(Anglia,Francja)]
+
 #Some standard layout to start with basic color theme
 sg.change_look_and_feel('LightGrey1')
 
@@ -176,6 +180,21 @@ def match_read():
     except:
         database = match_data
         return database
+#Read fp match database file        
+def fp_match_read():
+    try:
+        file = open(''.join((__location__, "\\fp_matches_data.pkl")),'rb')
+        database= pickle.load(file)
+        file.close()
+        return database
+    except:
+        database = fp_matches
+        return database
+#Write fp match database file
+def fp_match_write(database):
+    file = open(''.join((__location__, "\\fp_matches_data.pkl")),'wb')
+    pickle.dump(database,file,pickle.HIGHEST_PROTOCOL)
+    file.close()
 
 #Function to display Nations in given group and display their statistics
 def open_gr(Grupa):
@@ -208,16 +227,6 @@ def open_g():
         if event == "F": open_gr(gr_list[5])
         if event == "G": open_gr(gr_list[6])
         if event == "H": open_gr(gr_list[7])
-    window.close()
-
-#Function to open Drabinka Pucharowa window and its layout
-def open_dp():
-    layout = [[sg.Text("Drabinka Pucharowa")]]
-    window = sg.Window("DP Window",layout)
-    while True:
-        event, values = window.read()
-        if event == "Exit" or event == sg.WIN_CLOSED:
-            break
     window.close()
 
 #Function to open Typowanie window and its layout
@@ -351,7 +360,19 @@ def add_mgr(ind,obj,user,match_data):
         
     for x in range(6): obj.append(m[x])
     return obj
-
+def add_mfp(obj,user,fp_matches):
+    if not user: 
+        obj.append([sg.Text(f'1/8 Finału')])
+        m = [[sg.Text(fp_matches[i].__str__())] for i in range(8)]
+        m.append([sg.Text(f'1/4 Finału')])
+        for i in range(8,12): m.append([sg.Text(fp_matches[i].__str__())])
+    if user: 
+        obj.append([sg.Text(f'1/8 Finału'),sg.Button("Typuj",key = 'type_fp1')])
+        m = [[sg.InputText(size=(3,1)), sg.Text(f'({user.typy_p[2*i]})',font='bold'), sg.Text(fp_matches[i].__str__()), sg.Text(f'({user.typy_p[2*i+1]})',font='bold'), sg.InputText(size=(3,1))] for i in range(8)]
+        m.append([sg.Text(f'1/4 Finału')])
+        for i in range(8,12): m.append([sg.InputText(size=(3,1)), sg.Text(f'({user.typy_p[2*i]})',font='bold'), sg.Text(fp_matches[i].__str__()), sg.Text(f'({user.typy_p[2*i+1]})',font='bold'), sg.InputText(size=(3,1))])
+    for x in range(len(fp_matches)+1): obj.append(m[x])
+    return obj
 #Function to hangle Faza Grupowa window
 def open_fg(i,match_data):
     column = [[]]
@@ -370,15 +391,23 @@ def open_fg(i,match_data):
     window.close()
 
 #Function to hangle Faza Pucharowa window
-def open_fp():
-    layout = [[sg.Text('Drabinka')]]
-    window = sg.Window('',layout)
+def open_fp(i,fp_matches):
+    column = [[]]
+    if not i: sg.Popup("Zaloguj sie aby typowac mecze")
+    column = add_mfp(column,i,fp_matches)
+    layout = [[sg.Column(column, scrollable = False,vertical_scroll_only=False,element_justification='center',expand_x=True)]]
+    window = sg.Window('',layout,size=(600,600))
     while True:
         event, values = window.read()
-
+        if event == "type_fp1": 
+            i.typy_p = {k: (values[k] if values[k] else i.typy_p[k]) for k in range(24)}
+            window.close()
+            open_fp(i,fp_matches)
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
     window.close()
+
+    
 #Function to admin window
 def open_admin(match_list):
     layout = [[sg.Text('Podaj id meczu oraz wynik')], [ sg.Input(size = (5,5)),sg.Input(size = (5,5)), sg.Input(size = (5,5))], [sg.Submit(), sg.Cancel()]]
@@ -395,6 +424,7 @@ def open_admin(match_list):
     window.close()
     return match_list
 
+
 #Main function
 def main():
     #Horizontal layout definition for buttons
@@ -405,6 +435,7 @@ def main():
     i = None
     database = db_read()
     match_data = match_read()
+    fp_matches = fp_match_read()
     while True:
         
         event, values = window.read()
@@ -413,7 +444,7 @@ def main():
             break
         if event == "fg": open_fg(i,match_data)
         if event == "g": open_g()
-        if event == "fp": open_fp()
+        if event == "fp": open_fp(i,fp_matches)
         if event == "u": database == open_u(database)
         if event == "l":
             if not i: i,database = open_log(database)
@@ -423,6 +454,7 @@ def main():
     window.close()
     db_write(database)
     match_write(match_data)
+    fp_match_write(fp_matches)
 if __name__ == "__main__":
     main()
 
