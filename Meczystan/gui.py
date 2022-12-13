@@ -136,7 +136,7 @@ gr_list = [Grupa_A,Grupa_B,Grupa_C,Grupa_D,Grupa_E,Grupa_F,Grupa_G,Grupa_H]
 
 #List for Faza Pucharowa matches
 fp_matches = [Mecz(Holandia,USA),Mecz(Argentyna,Australia),Mecz(Francja,Polska),Mecz(Anglia,Senegal),Mecz(Japonia,Chorwacja),Mecz(Brazylia,Korea_Południowa),Mecz(Maroko,Hiszpania),Mecz(Portugalia,Szwajcaria),
-Mecz(Chorwacja,Brazylia),Mecz(Holandia,Argentyna),Mecz(Maroko,Portugalia),Mecz(Anglia,Francja)]
+Mecz(Chorwacja,Brazylia),Mecz(Holandia,Argentyna),Mecz(Maroko,Portugalia),Mecz(Anglia,Francja),Mecz(Argentyna,Chorwacja),Mecz(Francja,Maroko)]
 
 #Some standard layout to start with basic color theme
 sg.change_look_and_feel('LightGrey1')
@@ -366,12 +366,16 @@ def add_mfp(obj,user,fp_matches):
         m = [[sg.Text(fp_matches[i].__str__())] for i in range(8)]
         m.append([sg.Text(f'1/4 Finału')])
         for i in range(8,12): m.append([sg.Text(fp_matches[i].__str__())])
+        m.append([sg.Text(f'1/2 Finału')])
+        for i in range(12,14): m.append([sg.Text(fp_matches[i].__str__())])
     if user: 
         obj.append([sg.Text(f'1/8 Finału'),sg.Button("Typuj",key = 'type_fp1')])
         m = [[sg.InputText(size=(3,1)), sg.Text(f'({user.typy_p[2*i]})',font='bold'), sg.Text(fp_matches[i].__str__()), sg.Text(f'({user.typy_p[2*i+1]})',font='bold'), sg.InputText(size=(3,1))] for i in range(8)]
         m.append([sg.Text(f'1/4 Finału')])
         for i in range(8,12): m.append([sg.InputText(size=(3,1)), sg.Text(f'({user.typy_p[2*i]})',font='bold'), sg.Text(fp_matches[i].__str__()), sg.Text(f'({user.typy_p[2*i+1]})',font='bold'), sg.InputText(size=(3,1))])
-    for x in range(len(fp_matches)+1): obj.append(m[x])
+        m.append([sg.Text(f'1/2 Finału')])
+        for i in range(12,14): m.append([sg.InputText(size=(3,1)), sg.Text(f'({user.typy_p[2*i]})',font='bold'), sg.Text(fp_matches[i].__str__()), sg.Text(f'({user.typy_p[2*i+1]})',font='bold'), sg.InputText(size=(3,1))])
+    for x in range(len(fp_matches)+2): obj.append(m[x])
     return obj
 #Function to hangle Faza Grupowa window
 def open_fg(i,match_data):
@@ -400,7 +404,7 @@ def open_fp(i,fp_matches):
     while True:
         event, values = window.read()
         if event == "type_fp1": 
-            i.typy_p = {k: (values[k] if values[k] else i.typy_p[k]) for k in range(24)}
+            i.typy_p = {k: (values[k] if values[k] else i.typy_p[k]) for k in range(28)}
             window.close()
             open_fp(i,fp_matches)
         if event == "Exit" or event == sg.WIN_CLOSED:
