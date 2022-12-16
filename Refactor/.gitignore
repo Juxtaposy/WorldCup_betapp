@@ -1,0 +1,6 @@
+/.env.development
+users_data.pkl
+SQLQuery1.sql
+matches_data.pkl
+fp_matches_data.pkl
+backup
