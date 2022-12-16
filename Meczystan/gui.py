@@ -79,7 +79,7 @@ class Grupy:
     def __str__(self) -> str:
         return f'{self.team1.name}\n{self.team2.name}\n{self.team3.name}\n{self.team4.name}\n'
 
-#Match list
+#Match list - ta baze mozna stworzyc raz
 match_data = []
 
 #Nations and groups definition
@@ -134,7 +134,7 @@ Grupa_H = Grupy('H',Portugalia,Ghana,Urugwaj,Korea_Południowa)
 #A list of created group objects
 gr_list = [Grupa_A,Grupa_B,Grupa_C,Grupa_D,Grupa_E,Grupa_F,Grupa_G,Grupa_H]
 
-#List for Faza Pucharowa matches
+#List for Faza Pucharowa matches - ta baze mozna stworzyc raz
 #fp_matches = [Mecz(Holandia,USA),Mecz(Argentyna,Australia),Mecz(Francja,Polska),Mecz(Anglia,Senegal),Mecz(Japonia,Chorwacja),Mecz(Brazylia,Korea_Południowa),Mecz(Maroko,Hiszpania),Mecz(Portugalia,Szwajcaria),
 #Mecz(Chorwacja,Brazylia),Mecz(Holandia,Argentyna),Mecz(Maroko,Portugalia),Mecz(Anglia,Francja),Mecz(Argentyna,Chorwacja),Mecz(Francja,Maroko),Mecz(Chorwacja,Maroko),Mecz(Argentyna,Francja)]
 
