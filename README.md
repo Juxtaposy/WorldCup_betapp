@@ -2,4 +2,4 @@
 
 #Currently in anti design patter formula - EIM - Everything in Main
 
-#This is now Abandonware, store for historical purposes
+#This is now Abandonware, stored for historical purposes
